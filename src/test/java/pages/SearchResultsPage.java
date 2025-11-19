@@ -35,7 +35,16 @@ public class SearchResultsPage {
     // 4. Uçuş Kartları ve Saatler
     private By flightCard = By.cssSelector(".flight-item");
     private By flightsDepartureTimes = By.cssSelector(".flight-departure-time"); // Saat text class'ı
+    private By airlineFilterHeader = By.cssSelector(".ctx-filter-airline.card-header");
 
+    // THY Seçeneği (Label olarak tıklıyoruz)
+    private By thyCheckboxLabel =  By.xpath("//span[contains(text(),'Türk Hava Yolları')]");
+
+    // Uçuş Kartındaki Fiyat Bilgisi
+    private By flightPrice = By.cssSelector(".flight-price span.money-int"); // Class ismi değişebilir, kontrol etmelisin.
+
+    // Uçuş Kartındaki Havayolu İsmi
+    private By flightAirlineName = By.cssSelector(".summary-marketing-airlines"); // Havayolu ismi class'ı
     public SearchResultsPage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
@@ -52,6 +61,63 @@ public class SearchResultsPage {
         } catch (Exception e) {
             System.out.println("⚠️ Loader yakalanamadı.");
         }
+    }
+    public void filterTHY(){
+        System.out.println("🔍 Havayolu filtresi açılıyor...");
+
+        // 1. Başlığı bul ve tıkla (Accordion aç)
+        WebElement header = wait.until(ExpectedConditions.visibilityOfElementLocated(airlineFilterHeader));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", header);
+        sleep(500);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", header);
+
+        // 2. THY seçeneğini bul ve tıkla
+        System.out.println("✈️ Türk Hava Yolları seçiliyor...");
+        WebElement thyOption = wait.until(ExpectedConditions.elementToBeClickable(thyCheckboxLabel));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", thyOption);
+
+        // Sonuçların filtrelenmesini bekle (Loader çıkıp kaybolabilir)
+        sleep(3000);
+    }
+    public boolean checkTHY(){
+        System.out.println("🛡️ Havayolları kontrol ediliyor...");
+
+        // Kartların güncellenmesini bekle
+        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(flightCard, 0));
+        List<WebElement> airlineNames = driver.findElements(flightAirlineName);
+
+        for (WebElement airline : airlineNames) {
+            String name = airline.getText().toLowerCase();
+            if (!name.contains("türk hava yolları") && !name.contains("turkish airlines") && !name.contains("anadolujet")) {
+                // AnadoluJet de THY sayılabilir, case'e göre karar ver. Genelde THY filtreleyince AJet de gelir.
+                System.out.println("HATA: Listede farklı havayolu var -> " + name);
+                return false;
+            }
+        }
+        return true;
+    }
+    public boolean checkPricesAreSortedTHY(){
+        System.out.println("💰 Fiyat sıralaması kontrol ediliyor...");
+
+        List<WebElement> priceElements = driver.findElements(flightPrice);
+        if (priceElements.size() < 2) return true; // Tek uçuş varsa zaten sıralıdır.
+
+        double previousPrice = 0;
+
+        for (WebElement priceEl : priceElements) {
+            // Fiyat metnini sayıya çevir (Örn: "1.250 TL" -> 1250.0)
+            String priceText = priceEl.getText().replace(".", "").replace(",", ".").replaceAll("[^0-9.]", "");
+            double currentPrice = Double.parseDouble(priceText);
+
+            System.out.println("Fiyat: " + currentPrice);
+
+            if (currentPrice < previousPrice) {
+                System.out.println("HATA: Sıralama bozuk! " + previousPrice + " -> " + currentPrice);
+                return false;
+            }
+            previousPrice = currentPrice;
+        }
+        return true;
     }
 
     public void filterDepartureTime(int startOffset, int endOffset) {
