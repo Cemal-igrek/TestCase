@@ -11,8 +11,6 @@ Bu proje  "Junior QA Engineer" pozisyonu için hazırlanan teknik değerlendirme
 * **Veri İşleme:** OpenCSV (CSV Çıktısı), XChart (Grafik Oluşturma)
 * **Build Tool:** Maven
 
-## 🚀 Kurulum ve Çalıştırma
-
 ### Ön Koşullar
 * Java JDK 17 veya üzeri (Önerilen: JDK 21)
 * Maven
@@ -48,11 +46,7 @@ Amaç: Veri kazıma (Scraping) ve işleme yeteneğinin gösterilmesi.
 
 🔥 PriceHeatMap.png: Saatlere göre fiyat dağılım haritası.
 
-src/test/java
-├── pages/              # Sayfa elementleri ve metodları (HomePage, SearchResultsPage...)
-├── tests/              # Test sınıfları (FirstCase, SecondCase, ThirdCase...)
-├── utils/              # Yardımcı araçlar (DriverFactory, AnalyticsManager, ConfigReader)
-└── resources/          # Konfigürasyon (config.properties, log4j2.xml)
+
 
 📊 Raporlar ve Loglar
 Testler tamamlandığında proje ana dizininde otomatik olarak reports klasörü oluşur:
