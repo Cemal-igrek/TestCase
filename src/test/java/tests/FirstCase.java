@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import pages.HomePage;
+import pages.ResultPage;
 import pages.SearchResultsPage;
 
 public class FirstCase extends BaseTest {
@@ -14,18 +14,18 @@ public class FirstCase extends BaseTest {
     public void testBasicFlightSearchAndFilter() {
         logger.info("CASE 1 BAŞLIYOR: Temel Arama ve Saat Filtresi");
 
-        HomePage homePage = new HomePage(driver);
-        homePage.closeCookies();
+        ResultPage resultPage = new ResultPage(driver);
+        resultPage.closeCookies();
 
-        homePage.enterOrigin("İstanbul");
-        homePage.enterDestination("Ankara");
-        homePage.clickRoundTrip();
-        homePage.selectDepartureDate(26);
-        homePage.selectReturnDate(28);
-        homePage.closeCloseHotels();
+        resultPage.enterOrigin("İstanbul");
+        resultPage.enterDestination("Ankara");
+        resultPage.clickRoundTrip();
+        resultPage.selectDepartureDate(26);
+        resultPage.selectReturnDate(28);
+        resultPage.closeCloseHotels();
 
         logger.info("Arama butonuna basılıyor...");
-        homePage.clickSearchButton();
+        resultPage.clickSearchButton();
 
         SearchResultsPage resultsPage = new SearchResultsPage(driver);
         resultsPage.waitForPageLoad();

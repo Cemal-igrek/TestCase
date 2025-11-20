@@ -19,7 +19,7 @@ public class ConfigReader {
             properties.load(inputStream);
             inputStream.close();
         } catch (IOException e) {
-            logger.error("❌ Config dosyası okunamadı: " + e.getMessage());
+            logger.error("Config dosyası okunamadı: " + e.getMessage());
             throw new RuntimeException("Config file read error");
         }
     }

@@ -57,27 +57,27 @@ public class SearchResultsPage {
 
     public void waitForPageLoad() {
         try {
-            logger.info("⏳ Loader bekleniyor...");
+            logger.info(" Loader bekleniyor...");
             wait.until(ExpectedConditions.invisibilityOfElementLocated(loadingScreen));
             wait.until(ExpectedConditions.invisibilityOfElementLocated(filterBlocker));
-            logger.info("✅ Sayfa yüklendi.");
+            logger.info(" Sayfa yüklendi.");
         } catch (Exception e) {
-            logger.warn("⚠️ Loader yakalanamadı veya sayfa hızlı yüklendi.");
+            logger.warn("️Loader yakalanamadı veya sayfa hızlı yüklendi.");
         }
     }
 
 
     public void filterDepartureTime(int startOffset, int endOffset) {
-        logger.info("🔍 Filtre başlığı aranıyor...");
+        logger.info(" Filtre başlığı aranıyor...");
         WebElement header = wait.until(ExpectedConditions.presenceOfElementLocated(departureTimeFilterDropdown));
 
         scrollAndClick(header);
 
-        logger.info("⏳ Slider bekleniyor...");
+        logger.info(" Slider bekleniyor...");
         WebElement leftHandle = wait.until(ExpectedConditions.visibilityOfElementLocated(leftSliderHandle));
         WebElement rightHandle = wait.until(ExpectedConditions.visibilityOfElementLocated(rightSliderHandle));
 
-        logger.info("🎚️ Slider ayarlanıyor...");
+        logger.info(" Slider ayarlanıyor...");
         Actions actions = new Actions(driver);
         actions.clickAndHold(leftHandle).moveByOffset(startOffset, 0).release().perform();
         sleep(1000);
@@ -108,11 +108,11 @@ public class SearchResultsPage {
 
 
     public void filterTHY() {
-        logger.info("🔍 Havayolu filtresi açılıyor...");
+        logger.info("Havayolu filtresi açılıyor...");
         WebElement header = wait.until(ExpectedConditions.visibilityOfElementLocated(airlineFilterHeader));
         scrollAndClick(header);
 
-        logger.info("✈️ Türk Hava Yolları seçiliyor...");
+        logger.info("Türk Hava Yolları seçiliyor...");
         WebElement thyOption = wait.until(ExpectedConditions.elementToBeClickable(thyCheckboxLabel));
         scrollAndClick(thyOption);
 
@@ -153,7 +153,7 @@ public class SearchResultsPage {
 
 
     public void selectFirstFlight() {
-        logger.info("🎫 İlk uçuş seçiliyor...");
+        logger.info("İlk uçuş seçiliyor...");
 
         try {
             wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(allFlightItems, 0));
@@ -165,16 +165,16 @@ public class SearchResultsPage {
 
             WebElement selectBtn = firstCard.findElement(selectButtonLocator);
 
-            logger.info("🖱️ 'Seç' butonuna tıklanıyor...");
+            logger.info("️'Seç' butonuna tıklanıyor...");
             ((JavascriptExecutor) driver).executeScript("arguments[0].click();", selectBtn);
 
-            logger.info("⏳ 'Seç ve İlerle' butonu bekleniyor...");
+            logger.info(" 'Seç ve İlerle' butonu bekleniyor...");
             WebElement finalSelectBtn = wait.until(ExpectedConditions.elementToBeClickable(providerSelectButton));
             scrollAndClick(finalSelectBtn);
-            logger.info("✅ Uçuş seçimi tamamlandı.");
+            logger.info("Uçuş seçimi tamamlandı.");
 
         } catch (Exception e) {
-            logger.error("❌ Uçuş seçilemedi: " + e.getMessage());
+            logger.error(" Uçuş seçilemedi: " + e.getMessage());
             Assert.fail("Uçuş seçimi başarısız!");
         }
     }
@@ -182,7 +182,7 @@ public class SearchResultsPage {
     // --- CASE 4 ---
 
     public List<FlightData> scrapeFlightData() {
-        logger.info("📊 Uçuş verileri toplanıyor...");
+        logger.info("Uçuş verileri toplanıyor...");
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(45));
         wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(flightCard, 0));
@@ -211,10 +211,10 @@ public class SearchResultsPage {
                 logger.debug("Veri çekildi: " + airline + " - " + price);
 
             } catch (Exception e) {
-                logger.warn("⚠️ Kart okunamadı: " + e.getMessage());
+                logger.warn(" Kart okunamadı: " + e.getMessage());
             }
         }
-        logger.info("✅ Toplam " + flightDataList.size() + " uçuş verisi çekildi.");
+        logger.info(" Toplam " + flightDataList.size() + " uçuş verisi çekildi.");
         return flightDataList;
     }
 

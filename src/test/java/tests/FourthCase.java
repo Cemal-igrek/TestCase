@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import pages.HomePage;
+import pages.ResultPage;
 import pages.SearchResultsPage;
 import utils.AnalyticsManager;
 import utils.FlightData;
@@ -16,25 +16,25 @@ public class FourthCase extends BaseTest {
 
     @Test(description = "Case 4: Data Analysis & Visualization")
     public void analyzeFlightData() throws Exception {
-        logger.info("🚀 CASE 4 BAŞLIYOR: Veri Analizi ve Görselleştirme");
+        logger.info(" CASE 4 BAŞLIYOR: Veri Analizi ve Görselleştirme");
 
-        HomePage homePage = new HomePage(driver);
-        homePage.closeCookies();
+        ResultPage resultPage = new ResultPage(driver);
+        resultPage.closeCookies();
 
-        homePage.enterOrigin("İstanbul");
-        homePage.enterDestination("Lefkoşa");
+        resultPage.enterOrigin("İstanbul");
+        resultPage.enterDestination("Lefkoşa");
 
-        homePage.selectDepartureDate(28);
+        resultPage.selectDepartureDate(28);
 
-        homePage.closeCloseHotels();
-        homePage.clickSearchButton();
+        resultPage.closeCloseHotels();
+        resultPage.clickSearchButton();
 
         SearchResultsPage resultsPage = new SearchResultsPage(driver);
         resultsPage.waitForPageLoad();
 
         List<FlightData> data = resultsPage.scrapeFlightData();
         Assert.assertFalse(data.isEmpty(), "HATA: Hiç veri çekilemedi!");
-        logger.info("📊 Toplam " + data.size() + " uçuş verisi işleniyor...");
+        logger.info(" Toplam " + data.size() + " uçuş verisi işleniyor...");
 
         AnalyticsManager.saveToCSV(data, "flights_report.csv");
 
@@ -43,6 +43,6 @@ public class FourthCase extends BaseTest {
 
         AnalyticsManager.findBestFlight(data);
 
-        logger.info("✅ CASE 4 TAMAMLANDI! Raporlar 'reports' klasöründe oluşturuldu.");
+        logger.info(" CASE 4 TAMAMLANDI! Raporlar 'reports' klasöründe oluşturuldu.");
     }
 }

@@ -21,7 +21,7 @@ public class AnalyticsManager {
         File directory = new File(REPORT_DIR);
         if (!directory.exists()) {
             if (directory.mkdirs()) {
-                logger.info("📂 Rapor klasörü oluşturuldu: " + REPORT_DIR);
+                logger.info(" Rapor klasörü oluşturuldu: " + REPORT_DIR);
             }
         }
     }
@@ -35,9 +35,9 @@ public class AnalyticsManager {
             for (FlightData flight : flights) {
                 writer.writeNext(flight.toStringArray());
             }
-            logger.info("📄 Veriler CSV'ye kaydedildi: " + filePath);
+            logger.info("Veriler CSV'ye kaydedildi: " + filePath);
         } catch (IOException e) {
-            logger.error("❌ CSV Hatası: " + e.getMessage());
+            logger.error(" CSV Hatası: " + e.getMessage());
         }
     }
 
@@ -71,7 +71,7 @@ public class AnalyticsManager {
         chart.addSeries("Minimum Fiyat", airlines, minPrices);
 
         BitmapEncoder.saveBitmap(chart, REPORT_DIR + "PriceStatsGraph", BitmapEncoder.BitmapFormat.PNG);
-        logger.info("📊 Grafik kaydedildi: " + REPORT_DIR + "PriceStatsGraph.png");
+        logger.info("Grafik kaydedildi: " + REPORT_DIR + "PriceStatsGraph.png");
     }
 
     public static void createHeatMap(List<FlightData> flights) throws IOException {
@@ -104,13 +104,13 @@ public class AnalyticsManager {
         }
 
         BitmapEncoder.saveBitmap(chart, REPORT_DIR + "PriceHeatMap", BitmapEncoder.BitmapFormat.PNG);
-        logger.info("🔥 Isı haritası kaydedildi: " + REPORT_DIR + "PriceHeatMap.png");
+        logger.info("Isı haritası kaydedildi: " + REPORT_DIR + "PriceHeatMap.png");
     }
 
     public static void findBestFlight(List<FlightData> flights) {
         FlightData best = flights.stream().min(Comparator.comparingDouble(FlightData::getPrice)).orElse(null);
         if (best != null) {
-            logger.info("🏆 EN FİYAT/PERFORMANS UÇUŞ: " +
+            logger.info("EN FİYAT/PERFORMANS UÇUŞ: " +
                     best.getAirline() + " | Saat: " + best.getDepartureTime() + " | Fiyat: " + best.getPrice() + " TL");
         }
     }

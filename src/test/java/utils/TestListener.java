@@ -19,18 +19,18 @@ public class TestListener implements ITestListener {
 
     @Override
     public void onTestSuccess(ITestResult result) {
-        test.get().log(Status.PASS, "✅ Test Başarılı: " + result.getMethod().getMethodName());
+        test.get().log(Status.PASS, "Test Başarılı: " + result.getMethod().getMethodName());
     }
 
     @Override
     public void onTestFailure(ITestResult result) {
-        test.get().log(Status.FAIL, "❌ Test Başarısız: " + result.getMethod().getMethodName());
+        test.get().log(Status.FAIL, "Test Başarısız: " + result.getMethod().getMethodName());
         test.get().log(Status.FAIL, result.getThrowable());
     }
 
     @Override
     public void onTestSkipped(ITestResult result) {
-        test.get().log(Status.SKIP, "⏭️ Test Atlandı: " + result.getMethod().getMethodName());
+        test.get().log(Status.SKIP, "Test Atlandı: " + result.getMethod().getMethodName());
     }
 
     @Override

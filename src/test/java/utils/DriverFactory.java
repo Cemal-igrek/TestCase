@@ -28,7 +28,7 @@ public class DriverFactory {
         String browser = ConfigReader.getProperty("browser");
         if (browser == null) browser = "chrome";
 
-        logger.info("🚀 Tarayıcı başlatılıyor: " + browser);
+        logger.info(" Tarayıcı başlatılıyor: " + browser);
 
         if (browser.equalsIgnoreCase("chrome")) {
             ChromeOptions options = new ChromeOptions();
@@ -61,7 +61,7 @@ public class DriverFactory {
 
     public static void quitDriver() {
         if (driver.get() != null) {
-            logger.info("🛑 Tarayıcı kapatılıyor.");
+            logger.info(" Tarayıcı kapatılıyor.");
             driver.get().quit();
             driver.remove();
         }

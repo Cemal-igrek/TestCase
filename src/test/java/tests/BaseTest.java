@@ -23,26 +23,26 @@ public class BaseTest {
 
     @BeforeMethod
     public void setup() {
-        logger.info("🚀 Test başlatılıyor...");
+        logger.info(" Test başlatılıyor...");
         DriverFactory.initializeDriver();
         driver = DriverFactory.getDriver();
 
         String url = ConfigReader.getProperty("url");
         driver.get(url);
-        logger.info("🌐 Siteye gidildi: " + url);
+        logger.info("Siteye gidildi: " + url);
     }
 
     @AfterMethod
     public void tearDown(ITestResult result) {
         if (result.getStatus() == ITestResult.FAILURE) {
-            logger.error("❌ TEST BAŞARISIZ OLDU! Ekran görüntüsü alınıyor...");
+            logger.error("TEST BAŞARISIZ OLDU! Ekran görüntüsü alınıyor...");
             takeScreenshot(result.getName());
         } else {
-            logger.info("✅ Test başarıyla tamamlandı.");
+            logger.info(" Test başarıyla tamamlandı.");
         }
 
         DriverFactory.quitDriver();
-        logger.info("🛑 Tarayıcı kapatıldı.");
+        logger.info("Tarayıcı kapatıldı.");
     }
 
     public void takeScreenshot(String testName) {
@@ -59,7 +59,7 @@ public class BaseTest {
 
         try {
             Files.copy(srcFile.toPath(), destFile.toPath());
-            logger.info("📸 Ekran görüntüsü kaydedildi: " + destFile.getAbsolutePath());
+            logger.info(" Ekran görüntüsü kaydedildi: " + destFile.getAbsolutePath());
         } catch (IOException e) {
             logger.error("Ekran görüntüsü kaydedilemedi: " + e.getMessage());
         }
