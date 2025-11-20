@@ -19,4 +19,4 @@ Bu proje  "Junior QA Engineer" pozisyonu için hazırlanan teknik değerlendirme
 
 ### Projeyi Klonlama
 ```bash
-git clone [https://github.com/Cemal-igrek/TestCase.git```
+git clone [https://github.com/Cemal-igrek/TestCase.git]
