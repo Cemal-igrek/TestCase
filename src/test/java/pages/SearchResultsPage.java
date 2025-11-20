@@ -22,10 +22,8 @@ public class SearchResultsPage {
     private WebDriver driver;
     private WebDriverWait wait;
 
-    // Logger tanımla (System.out yerine bunu kullanacağız)
     private static final Logger logger = LogManager.getLogger(SearchResultsPage.class);
 
-    // --- LOCATORS ---
 
     private By loadingScreen = By.id("SearchRootLoading");
     private By filterBlocker = By.cssSelector(".filter-disabled");
@@ -56,7 +54,6 @@ public class SearchResultsPage {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
     }
 
-    // --- METODLAR ---
 
     public void waitForPageLoad() {
         try {
@@ -69,7 +66,6 @@ public class SearchResultsPage {
         }
     }
 
-    // --- CASE 1: Saat Filtresi ---
 
     public void filterDepartureTime(int startOffset, int endOffset) {
         logger.info("🔍 Filtre başlığı aranıyor...");
@@ -110,7 +106,6 @@ public class SearchResultsPage {
         return true;
     }
 
-    // --- CASE 2: Havayolu ve Fiyat ---
 
     public void filterTHY() {
         logger.info("🔍 Havayolu filtresi açılıyor...");
@@ -156,7 +151,6 @@ public class SearchResultsPage {
         return true;
     }
 
-    // --- CASE 3: Kritik Yol ---
 
     public void selectFirstFlight() {
         logger.info("🎫 İlk uçuş seçiliyor...");
@@ -185,7 +179,7 @@ public class SearchResultsPage {
         }
     }
 
-    // --- CASE 4: Veri Çekme ---
+    // --- CASE 4 ---
 
     public List<FlightData> scrapeFlightData() {
         logger.info("📊 Uçuş verileri toplanıyor...");
@@ -224,7 +218,6 @@ public class SearchResultsPage {
         return flightDataList;
     }
 
-    // --- YARDIMCI METODLAR ---
 
     private void scrollAndClick(WebElement element) {
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", element);
