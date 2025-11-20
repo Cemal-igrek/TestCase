@@ -1,5 +1,7 @@
 package pages;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -20,6 +22,10 @@ public class SearchResultsPage {
     private WebDriver driver;
     private WebDriverWait wait;
 
+    // Logger tanımla (System.out yerine bunu kullanacağız)
+    private static final Logger logger = LogManager.getLogger(SearchResultsPage.class);
+
+    // --- LOCATORS ---
 
     private By loadingScreen = By.id("SearchRootLoading");
     private By filterBlocker = By.cssSelector(".filter-disabled");
@@ -34,51 +40,48 @@ public class SearchResultsPage {
     private By flightsDepartureTimes = By.cssSelector(".flight-departure-time");
     private By flightsArrivalTimes = By.cssSelector(".flight-arrival-time");
     private By flightDuration = By.cssSelector("[data-testid='departureFlightTime']");
+    private By transferInfoLocator = By.cssSelector(".summary-transit");
 
     private By flightPrice = By.cssSelector(".summary-average-price .money-int");
     private By flightAirlineName = By.cssSelector(".summary-marketing-airlines");
 
     private By thyCheckboxLabel = By.xpath("//span[contains(text(),'Türk Hava Yolları')]");
 
-
     private By allFlightItems = By.cssSelector(".flight-list-body .flight-item");
-
     private By selectButtonLocator = By.cssSelector(".action-select-btn");
-
-
     private By providerSelectButton = By.cssSelector("[data-testid='providerSelectBtn']");
-    private By transferInfoLocator = By.cssSelector(".summary-transit");
 
     public SearchResultsPage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
     }
 
+    // --- METODLAR ---
 
     public void waitForPageLoad() {
         try {
-            System.out.println("⏳ Loader bekleniyor...");
+            logger.info("⏳ Loader bekleniyor...");
             wait.until(ExpectedConditions.invisibilityOfElementLocated(loadingScreen));
             wait.until(ExpectedConditions.invisibilityOfElementLocated(filterBlocker));
-            System.out.println("✅ Sayfa yüklendi.");
+            logger.info("✅ Sayfa yüklendi.");
         } catch (Exception e) {
-            System.out.println("⚠️ Loader yakalanamadı.");
+            logger.warn("⚠️ Loader yakalanamadı veya sayfa hızlı yüklendi.");
         }
     }
 
-    // --- CASE 1 & 2 ---
+    // --- CASE 1: Saat Filtresi ---
 
     public void filterDepartureTime(int startOffset, int endOffset) {
-        System.out.println("🔍 Filtre başlığı aranıyor...");
+        logger.info("🔍 Filtre başlığı aranıyor...");
         WebElement header = wait.until(ExpectedConditions.presenceOfElementLocated(departureTimeFilterDropdown));
 
         scrollAndClick(header);
 
-        System.out.println("⏳ Slider bekleniyor...");
+        logger.info("⏳ Slider bekleniyor...");
         WebElement leftHandle = wait.until(ExpectedConditions.visibilityOfElementLocated(leftSliderHandle));
         WebElement rightHandle = wait.until(ExpectedConditions.visibilityOfElementLocated(rightSliderHandle));
 
-        System.out.println("🎚️ Slider ayarlanıyor...");
+        logger.info("🎚️ Slider ayarlanıyor...");
         Actions actions = new Actions(driver);
         actions.clickAndHold(leftHandle).moveByOffset(startOffset, 0).release().perform();
         sleep(1000);
@@ -87,12 +90,34 @@ public class SearchResultsPage {
         sleep(2000);
     }
 
+    public boolean areDepartureTimesInRange(int startHour, int endHour) {
+        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(flightCard, 0));
+        List<WebElement> timeElements = driver.findElements(flightsDepartureTimes);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        LocalTime startTime = LocalTime.of(startHour, 0);
+        LocalTime endTime = LocalTime.of(endHour, 0);
+
+        for (WebElement timeEl : timeElements) {
+            String timeText = timeEl.getText();
+            if (timeText.isEmpty()) continue;
+            LocalTime flightTime = LocalTime.parse(timeText, formatter);
+
+            if (flightTime.isBefore(startTime) || flightTime.isAfter(endTime)) {
+                logger.error("HATALI SAAT BULUNDU: " + flightTime);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // --- CASE 2: Havayolu ve Fiyat ---
+
     public void filterTHY() {
-        System.out.println("🔍 Havayolu filtresi açılıyor...");
+        logger.info("🔍 Havayolu filtresi açılıyor...");
         WebElement header = wait.until(ExpectedConditions.visibilityOfElementLocated(airlineFilterHeader));
         scrollAndClick(header);
 
-        System.out.println("✈️ Türk Hava Yolları seçiliyor...");
+        logger.info("✈️ Türk Hava Yolları seçiliyor...");
         WebElement thyOption = wait.until(ExpectedConditions.elementToBeClickable(thyCheckboxLabel));
         scrollAndClick(thyOption);
 
@@ -106,7 +131,7 @@ public class SearchResultsPage {
         for (WebElement airline : airlineNames) {
             String name = airline.getText().toLowerCase();
             if (!name.contains("türk hava yolları") && !name.contains("turkish airlines") && !name.contains("anadolujet")) {
-                System.out.println("HATA: Listede farklı havayolu var -> " + name);
+                logger.error("HATA: Listede farklı havayolu var -> " + name);
                 return false;
             }
         }
@@ -123,7 +148,7 @@ public class SearchResultsPage {
             double currentPrice = Double.parseDouble(priceText);
 
             if (currentPrice < previousPrice) {
-                System.out.println("HATA: Sıralama bozuk! " + previousPrice + " -> " + currentPrice);
+                logger.error("HATA: Sıralama bozuk! " + previousPrice + " -> " + currentPrice);
                 return false;
             }
             previousPrice = currentPrice;
@@ -131,30 +156,10 @@ public class SearchResultsPage {
         return true;
     }
 
-    public boolean areDepartureTimesInRange(int startHour, int endHour) {
-        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(flightCard, 0));
-        List<WebElement> timeElements = driver.findElements(flightsDepartureTimes);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-        LocalTime startTime = LocalTime.of(startHour, 0);
-        LocalTime endTime = LocalTime.of(endHour, 0);
-
-        for (WebElement timeEl : timeElements) {
-            String timeText = timeEl.getText();
-            if (timeText.isEmpty()) continue;
-            LocalTime flightTime = LocalTime.parse(timeText, formatter);
-
-            if (flightTime.isBefore(startTime) || flightTime.isAfter(endTime)) {
-                System.out.println("HATALI SAAT BULUNDU: " + flightTime);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    // --- CASE 3 ---
+    // --- CASE 3: Kritik Yol ---
 
     public void selectFirstFlight() {
-        System.out.println("🎫 İlk uçuş seçiliyor...");
+        logger.info("🎫 İlk uçuş seçiliyor...");
 
         try {
             wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(allFlightItems, 0));
@@ -166,24 +171,24 @@ public class SearchResultsPage {
 
             WebElement selectBtn = firstCard.findElement(selectButtonLocator);
 
-            System.out.println("🖱️ 'Seç' butonuna tıklanıyor...");
+            logger.info("🖱️ 'Seç' butonuna tıklanıyor...");
             ((JavascriptExecutor) driver).executeScript("arguments[0].click();", selectBtn);
 
-            System.out.println("⏳ 'Seç ve İlerle' butonu bekleniyor...");
+            logger.info("⏳ 'Seç ve İlerle' butonu bekleniyor...");
             WebElement finalSelectBtn = wait.until(ExpectedConditions.elementToBeClickable(providerSelectButton));
             scrollAndClick(finalSelectBtn);
-            System.out.println("✅ Uçuş seçimi tamamlandı.");
+            logger.info("✅ Uçuş seçimi tamamlandı.");
 
         } catch (Exception e) {
-            System.out.println("❌ Uçuş seçilemedi: " + e.getMessage());
+            logger.error("❌ Uçuş seçilemedi: " + e.getMessage());
             Assert.fail("Uçuş seçimi başarısız!");
         }
     }
 
-    // --- CASE 4 --
+    // --- CASE 4: Veri Çekme ---
 
     public List<FlightData> scrapeFlightData() {
-        System.out.println("📊 Uçuş verileri toplanıyor...");
+        logger.info("📊 Uçuş verileri toplanıyor...");
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(45));
         wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(flightCard, 0));
@@ -191,7 +196,7 @@ public class SearchResultsPage {
         List<WebElement> cards = driver.findElements(flightCard);
         List<FlightData> flightDataList = new ArrayList<>();
 
-        System.out.println("Bulunan kart sayısı: " + cards.size());
+        logger.info("Bulunan kart sayısı: " + cards.size());
 
         for (WebElement card : cards) {
             try {
@@ -209,16 +214,17 @@ public class SearchResultsPage {
                 double price = Double.parseDouble(priceText);
 
                 flightDataList.add(new FlightData(airline, depTime, arrTime, duration, connection, price));
-                System.out.println("Veri çekildi: " + airline + " - " + price); // Her kart için log
+                logger.debug("Veri çekildi: " + airline + " - " + price);
 
             } catch (Exception e) {
-                System.out.println("⚠️ Kart okunamadı: " + e.getMessage());
+                logger.warn("⚠️ Kart okunamadı: " + e.getMessage());
             }
         }
-        System.out.println("✅ Toplam " + flightDataList.size() + " uçuş verisi çekildi.");
+        logger.info("✅ Toplam " + flightDataList.size() + " uçuş verisi çekildi.");
         return flightDataList;
     }
 
+    // --- YARDIMCI METODLAR ---
 
     private void scrollAndClick(WebElement element) {
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", element);

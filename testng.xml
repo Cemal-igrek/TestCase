@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Test Case">
+
+    <listeners>
+        <listener class-name="utils.TestListener"/>
+    </listeners>
+
+    <test name="Regression Tests">
+        <classes>
+            <class name="tests.FirstCase"/>
+            <class name="tests.SecondCase"/>
+            <class name="tests.ThirdCase"/>
+            <class name="tests.FourthCase"/>
+        </classes>
+    </test>
+</suite>

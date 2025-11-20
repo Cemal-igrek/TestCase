@@ -1,8 +1,12 @@
 package utils;
 
 import com.opencsv.CSVWriter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.knowm.xchart.*;
+import org.knowm.xchart.style.Styler;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
@@ -10,19 +14,36 @@ import java.util.stream.Collectors;
 
 public class AnalyticsManager {
 
-    public static void saveToCSV(List<FlightData> flights, String filePath) {
+    private static final String REPORT_DIR = "reports/";
+    private static final Logger logger = LogManager.getLogger(AnalyticsManager.class);
+
+    private static void createReportDirectory() {
+        File directory = new File(REPORT_DIR);
+        if (!directory.exists()) {
+            if (directory.mkdirs()) {
+                logger.info("📂 Rapor klasörü oluşturuldu: " + REPORT_DIR);
+            }
+        }
+    }
+
+    public static void saveToCSV(List<FlightData> flights, String fileName) {
+        createReportDirectory();
+        String filePath = REPORT_DIR + fileName;
+
         try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
             writer.writeNext(new String[]{"Airline", "Departure", "Arrival", "Duration", "Connection", "Price"});
             for (FlightData flight : flights) {
                 writer.writeNext(flight.toStringArray());
             }
-            System.out.println("📄 Veriler kaydedildi: " + filePath);
+            logger.info("📄 Veriler CSV'ye kaydedildi: " + filePath);
         } catch (IOException e) {
-            System.out.println("❌ CSV Hatası: " + e.getMessage());
+            logger.error("❌ CSV Hatası: " + e.getMessage());
         }
     }
 
     public static void createPriceAnalysisGraph(List<FlightData> flights) throws IOException {
+        createReportDirectory();
+
         Map<String, List<Double>> pricesByAirline = flights.stream()
                 .collect(Collectors.groupingBy(FlightData::getAirline,
                         Collectors.mapping(FlightData::getPrice, Collectors.toList())));
@@ -33,61 +54,63 @@ public class AnalyticsManager {
         List<String> airlines = new ArrayList<>();
         List<Double> avgPrices = new ArrayList<>();
         List<Double> minPrices = new ArrayList<>();
-        List<Double> maxPrices = new ArrayList<>();
 
-        System.out.println("\n--- İSTATİSTİKLER ---");
         for (Map.Entry<String, List<Double>> entry : pricesByAirline.entrySet()) {
             String airline = entry.getKey();
             List<Double> prices = entry.getValue();
 
             double min = Collections.min(prices);
-            double max = Collections.max(prices);
             double avg = prices.stream().mapToDouble(d -> d).average().orElse(0.0);
-
-            System.out.printf("%s -> Min: %.0f, Max: %.0f, Avg: %.0f TL\n", airline, min, max, avg);
 
             airlines.add(airline);
             avgPrices.add(avg);
             minPrices.add(min);
-            maxPrices.add(max);
         }
 
         chart.addSeries("Ortalama Fiyat", airlines, avgPrices);
         chart.addSeries("Minimum Fiyat", airlines, minPrices);
 
-        BitmapEncoder.saveBitmap(chart, "PriceStatsGraph", BitmapEncoder.BitmapFormat.PNG);
-        System.out.println("📊 Grafik kaydedildi: PriceStatsGraph.png");
+        BitmapEncoder.saveBitmap(chart, REPORT_DIR + "PriceStatsGraph", BitmapEncoder.BitmapFormat.PNG);
+        logger.info("📊 Grafik kaydedildi: " + REPORT_DIR + "PriceStatsGraph.png");
     }
 
     public static void createHeatMap(List<FlightData> flights) throws IOException {
+        createReportDirectory();
 
-        XYChart chart = new XYChartBuilder().width(800).height(600).title("Saatlik Fiyat Dağılımı").xAxisTitle("Saat").yAxisTitle("Fiyat").build();
+        XYChart chart = new XYChartBuilder().width(800).height(600)
+                .title("Saatlik Fiyat Dağılımı").xAxisTitle("Saat").yAxisTitle("Fiyat").build();
         chart.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Scatter);
 
-        for (String airline : flights.stream().map(FlightData::getAirline).distinct().collect(Collectors.toList())) {
+        Set<String> airlines = flights.stream().map(FlightData::getAirline).collect(Collectors.toSet());
+
+        for (String airline : airlines) {
             List<Double> xData = new ArrayList<>();
             List<Double> yData = new ArrayList<>();
 
             for (FlightData f : flights) {
                 if (f.getAirline().equals(airline)) {
-                    String[] timeParts = f.getDepartureTime().split(":");
-                    double hour = Double.parseDouble(timeParts[0]) + (Double.parseDouble(timeParts[1]) / 60.0);
-                    xData.add(hour);
-                    yData.add(f.getPrice());
+                    try {
+                        String[] timeParts = f.getDepartureTime().split(":");
+                        double hour = Double.parseDouble(timeParts[0]) + (Double.parseDouble(timeParts[1]) / 60.0);
+                        xData.add(hour);
+                        yData.add(f.getPrice());
+                    } catch (Exception e) {
+                    }
                 }
             }
             if (!xData.isEmpty()) {
                 chart.addSeries(airline, xData, yData);
             }
         }
-        BitmapEncoder.saveBitmap(chart, "PriceHeatMap", BitmapEncoder.BitmapFormat.PNG);
-        System.out.println("🔥 Isı haritası (Scatter) kaydedildi: PriceHeatMap.png");
+
+        BitmapEncoder.saveBitmap(chart, REPORT_DIR + "PriceHeatMap", BitmapEncoder.BitmapFormat.PNG);
+        logger.info("🔥 Isı haritası kaydedildi: " + REPORT_DIR + "PriceHeatMap.png");
     }
 
     public static void findBestFlight(List<FlightData> flights) {
         FlightData best = flights.stream().min(Comparator.comparingDouble(FlightData::getPrice)).orElse(null);
         if (best != null) {
-            System.out.println("\n🏆 EN FİYAT/PERFORMANS UÇUŞ: " +
+            logger.info("🏆 EN FİYAT/PERFORMANS UÇUŞ: " +
                     best.getAirline() + " | Saat: " + best.getDepartureTime() + " | Fiyat: " + best.getPrice() + " TL");
         }
     }

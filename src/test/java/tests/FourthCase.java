@@ -1,5 +1,7 @@
 package tests;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import pages.HomePage;
@@ -10,10 +12,11 @@ import utils.FlightData;
 import java.util.List;
 
 public class FourthCase extends BaseTest {
+    private static final Logger logger = LogManager.getLogger(FourthCase.class);
 
     @Test(description = "Case 4: Data Analysis & Visualization")
     public void analyzeFlightData() throws Exception {
-        System.out.println("🚀 CASE 4 BAŞLIYOR...");
+        logger.info("🚀 CASE 4 BAŞLIYOR: Veri Analizi ve Görselleştirme");
 
         HomePage homePage = new HomePage(driver);
         homePage.closeCookies();
@@ -31,6 +34,7 @@ public class FourthCase extends BaseTest {
 
         List<FlightData> data = resultsPage.scrapeFlightData();
         Assert.assertFalse(data.isEmpty(), "HATA: Hiç veri çekilemedi!");
+        logger.info("📊 Toplam " + data.size() + " uçuş verisi işleniyor...");
 
         AnalyticsManager.saveToCSV(data, "flights_report.csv");
 
@@ -39,6 +43,6 @@ public class FourthCase extends BaseTest {
 
         AnalyticsManager.findBestFlight(data);
 
-        System.out.println("✅ CASE 4 TAMAMLANDI! Raporlar proje klasöründe.");
+        logger.info("✅ CASE 4 TAMAMLANDI! Raporlar 'reports' klasöründe oluşturuldu.");
     }
 }

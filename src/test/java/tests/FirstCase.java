@@ -1,38 +1,43 @@
 package tests;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import pages.HomePage;
 import pages.SearchResultsPage;
 
 public class FirstCase extends BaseTest {
+    private static final Logger logger = LogManager.getLogger(FirstCase.class);
 
-    @Test
+    @Test(description = "Case 1: Basic Flight Search and Time Filter")
     public void testBasicFlightSearchAndFilter() {
-        System.out.println("TEST BAŞLIYOR: Ana sayfaya gidiliyor...");
+        logger.info("🚀 CASE 1 BAŞLIYOR: Temel Arama ve Saat Filtresi");
 
         HomePage homePage = new HomePage(driver);
         homePage.closeCookies();
+
         homePage.enterOrigin("İstanbul");
         homePage.enterDestination("Ankara");
         homePage.clickRoundTrip();
-        homePage.selectDepartureDate(25);
+        homePage.selectDepartureDate(26);
         homePage.selectReturnDate(28);
         homePage.closeCloseHotels();
-        System.out.println("Arama yapılıyor...");
+
+        logger.info("🔎 Arama butonuna basılıyor...");
         homePage.clickSearchButton();
+
         SearchResultsPage resultsPage = new SearchResultsPage(driver);
         resultsPage.waitForPageLoad();
 
-        System.out.println("Filtre uygulanıyor: 10:00 - 18:00");
+        logger.info("🎚️ Filtre uygulanıyor: 10:00 - 18:00");
         resultsPage.filterDepartureTime(100, -60);
 
-        System.out.println("Saatler kontrol ediliyor...");
-
+        logger.info("🛡️ Saatler kontrol ediliyor...");
         boolean isSuccess = resultsPage.areDepartureTimesInRange(10, 18);
 
         Assert.assertTrue(isSuccess, "HATA! Bazı uçuşlar 10:00 - 18:00 aralığında değil!");
 
-        System.out.println("TEST BAŞARIYLA TAMAMLANDI! Tüm uçuşlar istenen saat aralığında.");
+        logger.info("✅ CASE 1 BAŞARIYLA TAMAMLANDI.");
     }
 }
