@@ -20,24 +20,18 @@ public class SecondCase extends BaseTest {
         homePage.closeCloseHotels();
         System.out.println("Arama yapılıyor...");
         homePage.clickSearchButton();
-        // 2. SONUÇ SAYFASI
+
         SearchResultsPage resultsPage = new SearchResultsPage(driver);
         resultsPage.waitForPageLoad();
 
-        // 3. SAAT FİLTRESİ (İsteniyorsa, Case 2 metninde yazıyor)
         System.out.println("Saat filtresi uygulanıyor: 10:00 - 18:00");
         resultsPage.filterDepartureTime(100, -60);
 
-        // 4. THY FİLTRESİ
         resultsPage.filterTHY();
 
-        // 5. DOĞRULAMALAR
-
-        // A) Sadece THY mi?
         boolean isOnlyTHY = resultsPage.checkTHY();
         Assert.assertTrue(isOnlyTHY, "HATA: Listede Türk Hava Yolları dışındaki uçuşlar var!");
 
-        // B) Fiyatlar Sıralı mı?
         boolean isSorted = resultsPage.checkPricesAreSortedTHY();
         Assert.assertTrue(isSorted, "HATA: Fiyatlar küçükten büyüğe sıralı değil!");
 

@@ -9,7 +9,6 @@ public class ConfigReader {
 
     static {
         try {
-            // config.properties dosyasını okur
             String path = "src/test/resources/config.properties";
             FileInputStream inputStream = new FileInputStream(path);
             properties = new Properties();

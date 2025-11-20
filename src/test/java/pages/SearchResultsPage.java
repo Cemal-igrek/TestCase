@@ -8,10 +8,12 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
+import utils.FlightData;
 
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SearchResultsPage {
@@ -30,7 +32,10 @@ public class SearchResultsPage {
 
     private By flightCard = By.cssSelector(".flight-item");
     private By flightsDepartureTimes = By.cssSelector(".flight-departure-time");
-    private By flightPrice = By.cssSelector(".flight-price span.money-int");
+    private By flightsArrivalTimes = By.cssSelector(".flight-arrival-time");
+    private By flightDuration = By.cssSelector("[data-testid='departureFlightTime']");
+
+    private By flightPrice = By.cssSelector(".summary-average-price .money-int");
     private By flightAirlineName = By.cssSelector(".summary-marketing-airlines");
 
     private By thyCheckboxLabel = By.xpath("//span[contains(text(),'Türk Hava Yolları')]");
@@ -42,6 +47,7 @@ public class SearchResultsPage {
 
 
     private By providerSelectButton = By.cssSelector("[data-testid='providerSelectBtn']");
+    private By transferInfoLocator = By.cssSelector(".summary-transit");
 
     public SearchResultsPage(WebDriver driver) {
         this.driver = driver;
@@ -145,7 +151,8 @@ public class SearchResultsPage {
         return true;
     }
 
-    //Case 3 starting here
+    // --- CASE 3 ---
+
     public void selectFirstFlight() {
         System.out.println("🎫 İlk uçuş seçiliyor...");
 
@@ -171,6 +178,45 @@ public class SearchResultsPage {
             System.out.println("❌ Uçuş seçilemedi: " + e.getMessage());
             Assert.fail("Uçuş seçimi başarısız!");
         }
+    }
+
+    // --- CASE 4 --
+
+    public List<FlightData> scrapeFlightData() {
+        System.out.println("📊 Uçuş verileri toplanıyor...");
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(45));
+        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(flightCard, 0));
+
+        List<WebElement> cards = driver.findElements(flightCard);
+        List<FlightData> flightDataList = new ArrayList<>();
+
+        System.out.println("Bulunan kart sayısı: " + cards.size());
+
+        for (WebElement card : cards) {
+            try {
+                String airline = card.findElement(flightAirlineName).getText();
+                String depTime = card.findElement(flightsDepartureTimes).getText();
+                String arrTime = card.findElement(flightsArrivalTimes).getText();
+                String duration = card.findElement(flightDuration).getText();
+                String connection = card.findElement(transferInfoLocator).getText();
+
+                String priceText = card.findElement(flightPrice).getText()
+                        .replace(".", "")
+                        .replace(",", ".")
+                        .replaceAll("[^0-9.]", "");
+
+                double price = Double.parseDouble(priceText);
+
+                flightDataList.add(new FlightData(airline, depTime, arrTime, duration, connection, price));
+                System.out.println("Veri çekildi: " + airline + " - " + price); // Her kart için log
+
+            } catch (Exception e) {
+                System.out.println("⚠️ Kart okunamadı: " + e.getMessage());
+            }
+        }
+        System.out.println("✅ Toplam " + flightDataList.size() + " uçuş verisi çekildi.");
+        return flightDataList;
     }
 
 
