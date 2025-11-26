@@ -20,7 +20,7 @@ public class SecondCase extends BaseTest {
         resultPage.enterOrigin("İstanbul");
         resultPage.enterDestination("Ankara");
         resultPage.clickRoundTrip();
-        resultPage.selectDepartureDate(25);
+        resultPage.selectDepartureDate(27);
         resultPage.selectReturnDate(28);
         resultPage.closeCloseHotels();
 
